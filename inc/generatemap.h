@@ -25,7 +25,8 @@ private:
     };
 
     const int BASE_SIZE_ = 30;  //the size of basic unit of map.
-    const int ROBOT_SIZE = 25;
+    const int ROBOT_SIZE = 30;  //the size of robot
+    const int FLAG_SIZE = 32;   //the size of start and end point
     const int PILE_COEFFICIENT_ = 3;    //pile coefficient of map
     const float EROSING_COEFFICIENT_ = 0.3;  // erosing coefficient of map
     const float SAND_COEFFICIENT_ = 0.05;   // coefficient of sand

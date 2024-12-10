@@ -23,7 +23,7 @@ GenerateMap::GenerateMap(QWidget *parent)
     robot_label_ = new QLabel(this);
     robot_label_->hide();
     robot_label_->setFixedSize(ROBOT_SIZE, ROBOT_SIZE);
-    robot_label_->setStyleSheet("border-image: url(:/new/prefix1/image/robot1.png);");
+    robot_label_->setStyleSheet("border-image: url(:/new/prefix1/image/robot.png);");
 
     random_gen_ = new QRandomGenerator(QDateTime::currentMSecsSinceEpoch() % UINT_MAX);
 
@@ -563,14 +563,18 @@ void GenerateMap::showPoint()
 
     if(start_point_.x() != -1)
     {
-        painter.drawPixmap(start_point_.x()-32, start_point_.y()-32, 64, 64, start_image_);
-        update(QRect(start_point_.x(), start_point_.y(), 64, 64));
+        const int shift_size = FLAG_SIZE/2;
+        painter.drawPixmap(start_point_.x()-shift_size, start_point_.y()-shift_size, 
+                        FLAG_SIZE, FLAG_SIZE, start_image_);
+        update(QRect(start_point_.x(), start_point_.y(), FLAG_SIZE, FLAG_SIZE));
     }
 
     if(end_point_.x() != -1)
     {
-        painter.drawPixmap(end_point_.x()-32, end_point_.y()-32, 64, 64, end_image_);
-        update(QRect(end_point_.x(), end_point_.y(), 64, 64));
+        const int shift_size = FLAG_SIZE/2;
+        painter.drawPixmap(end_point_.x()-shift_size, end_point_.y()-shift_size, 
+                        FLAG_SIZE, FLAG_SIZE, end_image_);
+        update(QRect(end_point_.x(), end_point_.y(), FLAG_SIZE, FLAG_SIZE));
     }
 
     painter.end();
@@ -644,7 +648,7 @@ void GenerateMap::mousePressEvent(QMouseEvent *event)
 
         if(map_matrix_[pos.y()/BASE_SIZE_][pos.x()/BASE_SIZE_] == 1)
         {
-            QMessageBox::about(this, "Error", "起点和终点不能设置在障碍上!");
+            QMessageBox::about(this, "Error", "You can't set the start or end point on the wall");
             return;
         }
 

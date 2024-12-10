@@ -12,7 +12,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets LinguistTools)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets LinguistTools)
 
-# set(TS_FILES PathPlanning_zh_CN.ts)
+set(TS_FILES 
+    translations/en_US.ts
+    translations/zh_CN.ts
+    )
 
 set(PROJECT_SOURCES
         src/main.cpp
@@ -28,7 +31,7 @@ set(PROJECT_SOURCES
         inc/kdtree.h
         ui/mainwindow.ui
         res/qrc.qrc
-        # ${TS_FILES}
+        ${TS_FILES}
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -57,6 +60,12 @@ else()
 
     qt5_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
 endif()
+
+# Add custom target to update .ts files
+# qt_add_lupdate(PathPlanning TS_FILES ${TS_FILES})
+
+# Optional: Add custom target to release .qm files
+# qt_add_lrelease(PathPlanning QM_FILES OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/translations ${TS_FILES})
 
 target_include_directories(PathPlanning PRIVATE ${CMAKE_SOURCE_DIR}/inc)
 target_link_libraries(PathPlanning PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)

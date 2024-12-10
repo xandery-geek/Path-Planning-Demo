@@ -8,8 +8,8 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
 {
-    this->setWindowTitle("PathPlaining");
-    this->setWindowIcon(QIcon(QString(":/new/prefix1/image/robot _icon.png")));
+    this->setWindowTitle(QObject::tr("title"));
+    this->setWindowIcon(QIcon(QString(":/new/prefix1/image/robot_icon.png")));
     this->resize(800, 600);
 
     initWidget();
@@ -23,10 +23,10 @@ MainWindow::~MainWindow()
 
 void MainWindow::initWidget()
 {
-    width_label_ = new QLabel("宽度");
+    width_label_ = new QLabel(QObject::tr("width"));
     width_label_->setFixedWidth(50);
 
-    height_label_ = new QLabel("高度");
+    height_label_ = new QLabel(QObject::tr("height"));
     height_label_->setFixedWidth(50);
 
     width_edit_ = new QLineEdit("31");
@@ -35,10 +35,10 @@ void MainWindow::initWidget()
     height_edit_ = new QLineEdit("21");
     height_edit_->setFixedWidth(100);
 
-    QLabel *start_point = new QLabel("起点");
+    QLabel *start_point = new QLabel(QObject::tr("start"));
     start_point->setFixedWidth(50);
 
-    QLabel *end_point = new QLabel("终点");
+    QLabel *end_point = new QLabel(QObject::tr("end"));
     end_point->setFixedWidth(50);
 
     start_coordinate_ = new QLabel("");
@@ -46,32 +46,32 @@ void MainWindow::initWidget()
     end_coordinate_ = new QLabel("");
     end_coordinate_->setFixedWidth(100);
 
-    generate_button_ = new QPushButton("生成地图");
+    generate_button_ = new QPushButton(QObject::tr("generate_map"));
     generate_button_->setFixedWidth(100);
 
-    display_track_ = new QCheckBox("绘制轨迹");
+    display_track_ = new QCheckBox(QObject::tr("display_track"));
     display_track_->setFixedWidth(100);
     display_track_->setCheckable(false);
 
-    auto_mode_ = new QCheckBox("自动寻路");
+    auto_mode_ = new QCheckBox(QObject::tr("auto_mode"));
     auto_mode_->setFixedWidth(100);
 
-    distance_button_ = new QRadioButton("距离优先");
+    distance_button_ = new QRadioButton(QObject::tr("distance_priority"));
     distance_button_->setFixedWidth(100);
     distance_button_->setChecked(true);
-    oil_button_ = new QRadioButton("耗油量优先");
-    oil_button_->setFixedWidth(100);
+    energy_button_ = new QRadioButton(QObject::tr("energy_priority"));
+    energy_button_->setFixedWidth(100);
 
     radio_group_ = new QButtonGroup;
     radio_group_->addButton(distance_button_);
-    radio_group_->addButton(oil_button_);
+    radio_group_->addButton(energy_button_);
 
     start_button_ = new QPushButton();
     start_button_->setFixedSize(50, 50);
     setStartButton(false);
 
-    control_group_ = new QGroupBox("控制区");
-    map_group_ = new QGroupBox("地图");
+    control_group_ = new QGroupBox(QObject::tr("control_panel"));
+    map_group_ = new QGroupBox(QObject::tr("map"));
 
     map_ = new GenerateMap();
 
@@ -108,7 +108,7 @@ void MainWindow::initWidget()
     vertical_layout1->addLayout(hrizon_layout4);
     vertical_layout1->addSpacerItem(new QSpacerItem(10, 10, QSizePolicy::Fixed, QSizePolicy::Fixed));
     vertical_layout1->addWidget(distance_button_);
-    vertical_layout1->addWidget(oil_button_);
+    vertical_layout1->addWidget(energy_button_);
     vertical_layout1->addSpacerItem(new QSpacerItem(10, 10, QSizePolicy::Fixed, QSizePolicy::Fixed));
     vertical_layout1->addWidget(display_track_, Qt::AlignRight);
     vertical_layout1->addWidget(auto_mode_, Qt::AlignCenter);
@@ -213,7 +213,7 @@ void MainWindow::onStartButton()
     //start prm
     if(start_coordinate_->text() == "" || end_coordinate_->text() == "")
     {
-        QMessageBox::about(this, "Error", "请先在地图上设置起点和终点");
+        QMessageBox::about(this, "Error", "Please set start and end point");
         return;
     }
 
@@ -234,7 +234,7 @@ void MainWindow::onStartButton()
 
     if(points.empty())
     {
-        QMessageBox::about(this, "Not Find", "查找失败");
+        QMessageBox::about(this, "Not Find", "Path not find");
     }
     else
     {
@@ -258,7 +258,7 @@ void MainWindow::onDisplayButton()
 
         if(points.empty())
         {
-            QMessageBox::about(this, "Not Find", "查找失败");
+            QMessageBox::about(this, "Not Find", "Path not find");
         }
         else
         {

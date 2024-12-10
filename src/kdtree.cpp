@@ -71,12 +71,12 @@ void KdTree::deleteNode(const QPoint &pos)
 
 const KdTree::KdNode *KdTree::getNode(const KdTree::KdNode *node) const
 {
-
+    return nullptr;
 }
 
 const KdTree::KdNode *KdTree::getNode(const QPoint &pos) const
 {
-
+    return nullptr;
 }
 
 QVector<int> KdTree::getKNN(const QPoint &target)

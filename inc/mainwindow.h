@@ -34,7 +34,7 @@ private:
 
     QButtonGroup *radio_group_;
     QRadioButton *distance_button_; //the distance of path is the first factor
-    QRadioButton *oil_button_;  //the amount of the usage of oil is the first factor
+    QRadioButton *energy_button_;  //the amount of the usage of oil is the first factor
 
     QScrollArea *scroll_area_;
     GenerateMap *map_;
