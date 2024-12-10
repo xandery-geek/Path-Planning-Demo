@@ -10,9 +10,15 @@ int main(int argc, char *argv[])
     QString locale = QLocale::system().name();
 
     if (locale.startsWith("zh")) {
-        bool ret = translator.load(":/translations/zh_CN.qm");
+        bool ret = translator.load(":/i18n/lang/zh_CN.qm");
+        if (!ret) {
+            qDebug() << "load zh_CN.qm failed";
+        }
     } else {
-        bool ret = translator.load(":/translations/en_US.qm");
+        bool ret = translator.load(":/i18n/lang/en_US.qm");
+        if (!ret) {
+            qDebug() << "load en_US.qm failed";
+        }
     }
     app.installTranslator(&translator);
 

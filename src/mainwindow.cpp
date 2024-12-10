@@ -57,10 +57,10 @@ void MainWindow::initWidget()
     auto_mode_->setFixedWidth(100);
 
     distance_button_ = new QRadioButton(QObject::tr("distance_priority"));
-    distance_button_->setFixedWidth(100);
+    distance_button_->setFixedWidth(200);
     distance_button_->setChecked(true);
     energy_button_ = new QRadioButton(QObject::tr("energy_priority"));
-    energy_button_->setFixedWidth(100);
+    energy_button_->setFixedWidth(200);
 
     radio_group_ = new QButtonGroup;
     radio_group_->addButton(distance_button_);
