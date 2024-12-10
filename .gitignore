@@ -1,0 +1,13 @@
+.DS_Store
+.vscode/
+.qt/
+.lupdate/
+.cache/
+build/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+PathPlanning.app
+PathPlanning_autogen/
+figures/

@@ -1,0 +1,18 @@
+<RCC>
+    <qresource prefix="/new/prefix1">
+        <file>image/robot _icon.png</file>
+        <file>image/button1.png</file>
+        <file>image/button2.png</file>
+        <file>image/button3.png</file>
+        <file>image/wall.png</file>
+        <file>image/road.png</file>
+        <file>image/button4.png</file>
+        <file>image/start.png</file>
+        <file>image/end.png</file>
+        <file>image/road1.png</file>
+        <file>image/wall1.png</file>
+        <file>image/sand.jpg</file>
+        <file>image/robot1.png</file>
+        <file>image/robot2.png</file>
+    </qresource>
+</RCC>
