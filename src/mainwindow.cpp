@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include "custom_edit.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QSpacerItem>
@@ -35,6 +36,18 @@ void MainWindow::initWidget()
 
     height_edit_ = new QLineEdit("21");
     height_edit_->setFixedWidth(EDIT_WIDTH_);
+
+    map_seed_label_ = new QLabel(QObject::tr("map_seed"));
+    map_seed_label_->setFixedWidth(LABEL_WIDTH_);
+
+    prm_seed_label_ = new QLabel(QObject::tr("prm_seed"));
+    prm_seed_label_->setFixedWidth(LABEL_WIDTH_);
+
+    map_seed_edit_ = new QLineEdit("0");
+    map_seed_edit_->setFixedWidth(EDIT_WIDTH_);
+
+    prm_seed_edit_ = new QLineEdit("0");
+    prm_seed_edit_->setFixedWidth(EDIT_WIDTH_);
 
     QLabel *start_point = new QLabel(QObject::tr("start"));
     start_point->setFixedWidth(LABEL_WIDTH_);
@@ -84,14 +97,17 @@ void MainWindow::initWidget()
     start_button_->setToolTip(QObject::tr("start_plan"));
     setStartButton(false);
 
+    log_viewer_ = new CustomPlainTextEdit();
+    log_viewer_->setReadOnly(true);
+
     control_group_ = new QGroupBox(QObject::tr("control_panel"));
     map_group_ = new QGroupBox(QObject::tr("map"));
 
     map_ = new GenerateMap();
 
     scroll_area_ = new QScrollArea;
-    scroll_area_->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-    scroll_area_->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+    // scroll_area_->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+    // scroll_area_->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     scroll_area_->setWidgetResizable(true);
     scroll_area_->setWidget(map_);
 
@@ -103,6 +119,8 @@ void MainWindow::initWidget()
     QHBoxLayout *hrizon_layout6 = new QHBoxLayout;
     QHBoxLayout *hrizon_layout7 = new QHBoxLayout;
     QHBoxLayout *hrizon_layout8 = new QHBoxLayout;
+    QHBoxLayout *hrizon_layout9 = new QHBoxLayout;
+    QHBoxLayout *hrizon_layout10 = new QHBoxLayout;
 
     hrizon_layout1->addWidget(width_label_);
     hrizon_layout1->addWidget(width_edit_);
@@ -128,11 +146,21 @@ void MainWindow::initWidget()
     hrizon_layout8->addWidget(generate_button_);
     hrizon_layout8->addWidget(start_button_);
 
+    hrizon_layout9->addWidget(map_seed_label_);
+    hrizon_layout9->addWidget(map_seed_edit_);
+
+    hrizon_layout10->addWidget(prm_seed_label_);
+    hrizon_layout10->addWidget(prm_seed_edit_);
+
     QVBoxLayout *vertical_layout1 = new QVBoxLayout;
     QVBoxLayout *vertical_layout2 = new QVBoxLayout;
 
     vertical_layout1->addLayout(hrizon_layout1);
     vertical_layout1->addLayout(hrizon_layout2);
+
+    vertical_layout1->addSpacerItem(new QSpacerItem(10, 10, QSizePolicy::Fixed, QSizePolicy::Fixed));
+    vertical_layout1->addLayout(hrizon_layout9);
+    vertical_layout1->addLayout(hrizon_layout10);
     
     vertical_layout1->addSpacerItem(new QSpacerItem(10, 10, QSizePolicy::Fixed, QSizePolicy::Fixed));
     vertical_layout1->addLayout(hrizon_layout3);
@@ -147,6 +175,9 @@ void MainWindow::initWidget()
 
     vertical_layout1->addSpacerItem(new QSpacerItem(10, 10, QSizePolicy::Fixed, QSizePolicy::Fixed));
     vertical_layout1->addLayout(hrizon_layout8);
+
+    vertical_layout1->addSpacerItem(new QSpacerItem(10, 10, QSizePolicy::Fixed, QSizePolicy::Fixed));
+    vertical_layout1->addWidget(log_viewer_);
 
     vertical_layout1->addSpacerItem(new QSpacerItem(10, 10, QSizePolicy::Fixed, QSizePolicy::Expanding));
 
@@ -171,6 +202,8 @@ void MainWindow::connectSigal()
 {
     connect(width_edit_, SIGNAL(textChanged(QString)), this, SLOT(onEditChange()));
     connect(height_edit_, SIGNAL(textChanged(QString)), this, SLOT(onEditChange()));
+    connect(map_seed_edit_, SIGNAL(textChanged(QString)), this, SLOT(onEditChange()));
+    connect(prm_seed_edit_, SIGNAL(textChanged(QString)), this, SLOT(onEditChange()));
     connect(generate_button_, SIGNAL(clicked(bool)), this, SLOT(onGenerateButton()));
     connect(display_track_, SIGNAL(clicked(bool)), this, SLOT(onDisplayButton()));
     connect(auto_mode_, SIGNAL(stateChanged(int)), this, SLOT(onAutoModeChanged(int)));
@@ -229,6 +262,13 @@ void MainWindow::onAutoModeChanged(int state)
 void MainWindow::onGenerateButton()
 {
     //update map
+    log_viewer_->appendPlainText("Generating map...");
+
+    //set random seed
+    int map_seed = map_seed_edit_->text().toInt();
+    map_->setRandomSeed(map_seed);
+
+    //generate map
     map_->creatMap(width_edit_->text().toInt(), height_edit_->text().toInt());
     map_->showMap();
 
@@ -250,33 +290,47 @@ void MainWindow::onStartButton()
         return;
     }
 
-    //start prm
     if(start_coordinate_->text() == "" || end_coordinate_->text() == "")
     {
+        log_viewer_->appendPlainText("Please set start and end point");
         QMessageBox::about(this, "Error", "Please set start and end point");
         return;
     }
 
-    prm.setStartPoint(map_->getStartPoint());    //set start point
-    prm.setEndPoint(map_->getEndPoint());      //set end point
-    prm.constructGraph(map_->getMapMatrix(), map_->getMapHeight(), map_->getMapWidth());
+    bool distance_first = distance_button_->isChecked();
+    const QString &algorithm = astar_button_->isChecked() ? "AStar" : "Dijkstra";
+    
+    log_viewer_->appendPlainText("Searching path..." 
+                                "\nAlgorithm: " + algorithm + 
+                                "\nStrategy: " + (distance_first ? "distance first" : "energy first"));
 
-    bool option = distance_button_->isChecked() ? false : true;
+    //set random seed
+    int prm_seed = prm_seed_edit_->text().toInt();
+    prm.setRandomSeed(prm_seed);
+
+    prm.setStartPoint(map_->getStartPoint());   //set start point
+    prm.setEndPoint(map_->getEndPoint());      //set end point
+    prm.setStrategy(algorithm);                 //set algorithm
+    prm.constructGraph(map_->getMapMatrix(), map_->getMapHeight(), map_->getMapWidth());
+    
     try {
-        prm.searchPath(option);   //search path by PRM, distance first
+        prm.searchPath(distance_first);   //search path by PRM, distance first
     } catch (std::runtime_error &e) {
         QMessageBox::about(this, "Error", e.what());
         return;
     }
 
     QVector<QPoint> points = prm.getPath();
-
     if(points.empty())
     {
+        log_viewer_->appendPlainText("Path not find");
         QMessageBox::about(this, "Not Find", "Path not find");
     }
     else
     {
+        float cost = prm.calPathCost(points, distance_first);
+        log_viewer_->appendPlainText("Path cost: " + QString::number(cost));
+
         map_->showRobot(points);    //show animation
         setStartButton(false);      //disable start button
 

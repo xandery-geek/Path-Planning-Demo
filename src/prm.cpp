@@ -87,7 +87,7 @@ void PRM::generateArc(const QVector<QPoint>& points)
     //search the K nearest neighbors
     QVector<QPoint>::const_iterator it = points.begin();
     int index = 0;
-    float dis, oil;
+    float distance, energy;
 
     for(; it !=points.end(); it++)
     {
@@ -98,11 +98,11 @@ void PRM::generateArc(const QVector<QPoint>& points)
         {            
             if(checkPath(points[index], points[neighbors[i]]))
             {
-                dis = getDistance(points[index], points[neighbors[i]]);
-                oil = getOil(points[index], points[neighbors[i]]);
+                distance = calHeuristicDistance(points[index], points[neighbors[i]]);
+                energy = calHeuristicEnergy(points[index], points[neighbors[i]]);
 
-                prm_graph_.addArc(index, neighbors[i], dis, oil);     //add to arc table
-                prm_graph_.addArc(neighbors[i], index, dis, oil);     //add to arc table
+                prm_graph_.addArc(index, neighbors[i], distance, energy);     //add to arc table
+                prm_graph_.addArc(neighbors[i], index, distance, energy);     //add to arc table
             }
         }
         index++;
@@ -126,20 +126,51 @@ void PRM::setEndPoint(const QPoint &point)
     goal_.setY(point.y());
 }
 
-void PRM::searchPath(bool option)
+void PRM::setRandomSeed(int seed)
+{
+    if(seed == 0)
+    {
+        random_gen_->seed(QDateTime::currentMSecsSinceEpoch() % UINT_MAX);
+    }
+    else
+    {
+        random_gen_->seed(seed);
+    }
+}
+
+void PRM::searchPath(bool distance_first)
 {
     if(stragety_ == "AStar")
     {
-        AStar(option);
+        AStar(distance_first);
     }
     else if(stragety_ == "Dijkstra")
     {
-        Dijkstra(option);
+        Dijkstra(distance_first);
     }
     else
     {
         throw std::runtime_error("Invalid stragety");
     }
+}
+
+float PRM::calPathCost(const QVector<QPoint> &points, bool distance_first)
+{
+    float cost = 0.0f;
+
+    if(points.size() == 0)
+    {
+        return cost;
+    }
+
+    auto heuristic_function = selectHeuristic(distance_first);
+
+    for(int i=0; i<points.size()-1; i++)
+    {
+        cost += heuristic_function(points[i], points[i+1]);
+    }
+
+    return cost;
 }
 
 const QVector<QPoint> &PRM::getPath() const
@@ -152,39 +183,34 @@ const Graph &PRM::getGraph() const
     return prm_graph_;
 }
 
-void PRM::AStar(bool option)
+/**
+@brief PRM::Dijkstra
+@param distance_first: true for distance first, false for energy first
+@desc Dijkstra algorithm
+*/
+void PRM::Dijkstra(bool distance_first)
 {
-    //function pointer which point to the function of weight calculate
-    float (PRM::*getWeight)(const QPoint& point1, const QPoint& point2);
-
-    if(option)  //oil first
-    {
-        getWeight = &PRM::getOil;
-    }
-    else    //distance first
-    {
-        getWeight = &PRM::getDistance;
-    }
+    auto heuristic_function = selectHeuristic(distance_first);
 
     const QVector<Graph::Vertex> vertex = prm_graph_.getVertex();
 
     int start = prm_graph_.getVertex(start_);
     int goal = prm_graph_.getVertex(goal_);
 
-    std::priority_queue<AStarCost, QVector<AStarCost>, std::greater<AStarCost>> queue;  //gobal distance
+    std::priority_queue<PathCost, QVector<PathCost>, std::greater<PathCost>> queue;  //gobal distance
     std::unordered_map<int, int> parent;  //the parent node of path node
     std::unordered_map<int, float> open_list; //current actual distance
-    std::set<int> close_list;
+    std::set<int> close_list; // visited set
     QVector<int> neightbor;
 
-    queue.push(AStarCost(start, 0));  //push start point into queue
+    queue.push(PathCost(start, 0));  //push start point into queue
     parent[start] = -1;   // -1 stand for no parent node
     open_list[start] = 0;
 
     while(!queue.empty())
     {
-        AStarCost current_const = queue.top();
-        int current = current_const.index;
+        PathCost current_cost = queue.top();
+        int current = current_cost.index;
         queue.pop();
 
         close_list.insert(current); //visited
@@ -196,7 +222,6 @@ void PRM::AStar(bool option)
         }
 
         neightbor = prm_graph_.getNeightbor(current);
-
         for(int next: neightbor)
         {
             if(close_list.find(next) != close_list.end())   //visited
@@ -204,15 +229,15 @@ void PRM::AStar(bool option)
                 continue;
             }
 
-            float new_const = open_list.at(current) +
-                    (this->*getWeight)(vertex[current].pos, vertex[next].pos);   //G
-
+            //claculate the new cost
+            float new_cost = open_list.at(current) +
+                    heuristic_function(vertex[current].pos, vertex[next].pos);
+            
             if(open_list.find(next) == open_list.end()
-                    || new_const < open_list.at(next))
+                    || new_cost < open_list.at(next))
             {
-                open_list[next] = new_const;
-                new_const += (this->*getWeight)(vertex[next].pos, vertex[goal].pos); //F = G + H
-                queue.push(AStarCost(next, new_const));
+                open_list[next] = new_cost;
+                queue.push(PathCost(next, new_cost));
                 parent[next] = current;
             }
         }
@@ -221,39 +246,34 @@ void PRM::AStar(bool option)
     path_.clear();  //empty path
 }
 
-void PRM::Dijkstra(bool option)
+/** 
+@brief PRM::AStar
+@param distance_first: true for distance first, false for energy first
+@desc A star algorithm, the difference between A star and Dijkstra is that A star has a heuristic weight
+*/
+void PRM::AStar(bool distance_first)
 {
-    //function pointer which point to the function of weight calculate
-    float (PRM::*getWeight)(const QPoint& point1, const QPoint& point2);
-
-    if(option)  //oil first
-    {
-        getWeight = &PRM::getOil;
-    }
-    else    //distance first
-    {
-        getWeight = &PRM::getDistance;
-    }
+    auto heuristic_function = selectHeuristic(distance_first);
 
     const QVector<Graph::Vertex> vertex = prm_graph_.getVertex();
 
     int start = prm_graph_.getVertex(start_);
     int goal = prm_graph_.getVertex(goal_);
 
-    std::priority_queue<AStarCost, QVector<AStarCost>, std::greater<AStarCost>> queue;  //gobal distance
+    std::priority_queue<PathCost, QVector<PathCost>, std::greater<PathCost>> queue;  //gobal distance
     std::unordered_map<int, int> parent;  //the parent node of path node
     std::unordered_map<int, float> open_list; //current actual distance
     std::set<int> close_list;
     QVector<int> neightbor;
 
-    queue.push(AStarCost(start, 0));  //push start point into queue
+    queue.push(PathCost(start, 0));  //push start point into queue
     parent[start] = -1;   // -1 stand for no parent node
     open_list[start] = 0;
 
     while(!queue.empty())
     {
-        AStarCost current_const = queue.top();
-        int current = current_const.index;
+        PathCost current_cost = queue.top();
+        int current = current_cost.index;
         queue.pop();
 
         close_list.insert(current); //visited
@@ -273,14 +293,21 @@ void PRM::Dijkstra(bool option)
                 continue;
             }
 
-            float new_const = open_list.at(current) +
-                    (this->*getWeight)(vertex[current].pos, vertex[next].pos);   //G
+            //claculate the new cost
+            //When two points are adjacent, the heuristic weight is the actual weight
+            float new_cost = open_list.at(current) +
+                    heuristic_function(vertex[current].pos, vertex[next].pos);
 
+            // update the cost of next node when it is not in open list or the new cost is smaller
             if(open_list.find(next) == open_list.end()
-                    || new_const < open_list.at(next))
+                    || new_cost < open_list.at(next))
             {
-                open_list[next] = new_const;
-                queue.push(AStarCost(next, new_const));
+                open_list[next] = new_cost;
+                //f(n) = g(n) + h(n)
+                //g(n) is the actual distance from start to current
+                //h(n) is the heuristic weight from current to goal
+                new_cost += heuristic_function(vertex[next].pos, vertex[goal].pos);
+                queue.push(PathCost(next, new_cost));
                 parent[next] = current;
             }
         }
@@ -324,14 +351,26 @@ bool PRM::checkPath(const QPoint &point1, const QPoint &point2)
     return true;
 }
 
-float PRM::getDistance(const QPoint &point1, const QPoint &point2)
+/**
+ * @brief PRM::calHeuristicDistance
+ * @param point1
+ * @param point2
+ * @return the euclidean distance between two points
+ */
+float PRM::calHeuristicDistance(const QPoint &point1, const QPoint &point2)
 {
     return sqrt(pow(point1.x() - point2.x(), 2) + pow(point1.y() - point2.y(), 2));
 }
 
-float PRM::getOil(const QPoint &point1, const QPoint &point2)
+/**
+ * @brief PRM::calHeuristicEnergy
+ * @param point1
+ * @param point2
+ * @return the energy cost between two points
+ */
+float PRM::calHeuristicEnergy(const QPoint &point1, const QPoint &point2)
 {
-    float oil = 0.0f;
+    float energy = 0.0f;
 
     QPoint point1_ = transposePoint(point1);
     QPoint point2_ = transposePoint(point2);
@@ -359,15 +398,15 @@ float PRM::getOil(const QPoint &point1, const QPoint &point2)
     {
         if(graph_mat_[it->x()][it->y()] == 2)
         {
-            oil += SAND_WEIGHT;
+            energy += SAND_WEIGHT;
         }
         else
         {
-            oil += ROAD_WEIGHT;
+            energy += ROAD_WEIGHT;
         }
     }
 
-    return oil;
+    return energy;
 }
 
 QPoint PRM::transposePoint(const QPoint &point)

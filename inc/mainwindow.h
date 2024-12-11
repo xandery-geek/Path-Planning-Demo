@@ -11,6 +11,7 @@
 #include <QButtonGroup>
 #include <QCheckBox>
 #include "generatemap.h"
+#include "custom_edit.h"
 #include "prm.h"
 
 class MainWindow : public QMainWindow
@@ -29,8 +30,14 @@ private:
     QLabel *start_coordinate_;
     QLabel *end_coordinate_;
 
+    QLabel *map_seed_label_;
+    QLabel *prm_seed_label_;
+
     QLineEdit *width_edit_;
     QLineEdit *height_edit_;
+
+    QLineEdit *map_seed_edit_;
+    QLineEdit *prm_seed_edit_;
 
     QPushButton *generate_button_;
     QPushButton *start_button_;
@@ -43,6 +50,8 @@ private:
     QRadioButton *energy_button_;  //the amount of the usage of oil is the first factor
     QRadioButton *astar_button_;   //use A* algorithm to search path
     QRadioButton *dijkstra_button_;    //use Dijkstra algorithm to search path
+
+    CustomPlainTextEdit *log_viewer_;
 
     QScrollArea *scroll_area_;
     GenerateMap *map_;

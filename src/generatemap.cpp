@@ -723,6 +723,18 @@ const QPoint GenerateMap::getEndPoint() const
     return QPoint(end_point_.x()/BASE_SIZE_, end_point_.y()/BASE_SIZE_);
 }
 
+void GenerateMap::setRandomSeed(int seed)
+{
+    if(seed == 0)
+    {
+        random_gen_->seed(QDateTime::currentMSecsSinceEpoch() % UINT_MAX);
+    }
+    else
+    {
+        random_gen_->seed(seed);
+    }
+}
+
 void GenerateMap::setMapSize(int width, int height)
 {
     width_ = width;

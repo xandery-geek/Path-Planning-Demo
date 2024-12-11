@@ -29,6 +29,7 @@ set(PROJECT_SOURCES
     inc/prm.h
     inc/graph.h
     inc/kdtree.h
+    inc/custom_edit.h
     ui/mainwindow.ui
     res/qrc.qrc
     )

@@ -79,6 +79,8 @@ public:
     const QPoint getStartPoint() const;
     const QPoint getEndPoint() const;
 
+    void setRandomSeed(int seed);
+
 protected:
     void paintEvent(QPaintEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;

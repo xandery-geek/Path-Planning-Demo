@@ -75,7 +75,7 @@ void Graph::addArc(int start, int end)
     arc->next_arc = nullptr;
 }
 
-void Graph::addArc(int start, int end, float distance, float oil)
+void Graph::addArc(int start, int end, float distance, float energy)
 {
     Graph::Arc *arc = graph_[start].head_arc;
 
@@ -96,7 +96,7 @@ void Graph::addArc(int start, int end, float distance, float oil)
     }
 
     arc->distance = distance;
-    arc->oil = oil;
+    arc->oil = energy;
     arc->next_arc = nullptr;
 }
 

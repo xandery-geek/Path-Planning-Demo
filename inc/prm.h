@@ -9,30 +9,30 @@
 #include "kdtree.h"
 
 
-class AStarCost
+class PathCost
 {
 public:
     int index;
     float cost;
 
-    AStarCost()
+    PathCost()
     {
         index = 0;
         cost = 0.0f;
     }
 
-    AStarCost(int index, float cost)
+    PathCost(int index, float cost)
     {
         this->index = index;
         this->cost = cost;
     }
 
-    bool operator <(const AStarCost& obj) const
+    bool operator <(const PathCost& obj) const
     {
         return this->cost < obj.cost;
     }
 
-    bool operator >(const AStarCost& obj) const
+    bool operator >(const PathCost& obj) const
     {
         return this->cost > obj.cost;
     }
@@ -70,20 +70,31 @@ public:
     void setStrategy(const QString& stragety);
     void setStartPoint(const QPoint& point);
     void setEndPoint(const QPoint& point);
-    void searchPath(bool option);
+    void setRandomSeed(int seed);
+    void searchPath(bool distance_first);
+    float calPathCost(const QVector<QPoint>& points, bool distance_first);
+
     const QVector<QPoint>& getPath() const;
     const Graph& getGraph() const;
 
 private:
-    void AStar(bool option);
-    void Dijkstra(bool option);
+    void AStar(bool distance_first);
+    void Dijkstra(bool distance_first);
     bool checkPath(const QPoint& point1, const QPoint& point2);
-    float getDistance(const QPoint& point1, const QPoint& point2);
-    float getOil(const QPoint& point1, const QPoint& point2);
+    float calHeuristicDistance(const QPoint& point1, const QPoint& point2);
+    float calHeuristicEnergy(const QPoint& point1, const QPoint& point2);
     QPoint transposePoint(const QPoint& point);
     bool isCrash(const int** mat, int row, int col, const QPoint& point);
     void reconstructPath(const QVector<Graph::Vertex> &vertex, int start, int goal,
                          const std::unordered_map<int, int> &close_list);
+
+    std::function<float(const QPoint&, const QPoint&)> selectHeuristic(bool distance_first) {
+        if (distance_first) {
+            return [this](const QPoint& p1, const QPoint& p2) { return calHeuristicDistance(p1, p2); };
+        } else {
+            return [this](const QPoint& p1, const QPoint& p2) { return calHeuristicEnergy(p1, p2); };
+        }
+    }
 };
 
 #endif // PRM_H
