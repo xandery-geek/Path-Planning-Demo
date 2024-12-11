@@ -41,7 +41,6 @@ public:
 class PRM
 {
 private:
-
     const float VERTEX_COEFFICIENT = 0.4;
     const float K_COEFFICIENT = 0.02;
     const float ROAD_WEIGHT = 1;
@@ -49,7 +48,6 @@ private:
 
     QPoint start_;
     QPoint goal_;
-
     QVector<QPoint> path_;
 
     Graph prm_graph_;
@@ -59,15 +57,17 @@ private:
     const int **graph_mat_; //the actual map data
     int graph_mat_row_;
     int graph_mat_col_;
+    QString stragety_;
 
     QRandomGenerator *random_gen_;
 
 public:
-    PRM();
+    PRM(const QString& stragety="AStar");
     ~PRM();
 
     void constructGraph(const int** mat, int row, int col);
     void generateArc(const QVector<QPoint>& points); //KNN
+    void setStrategy(const QString& stragety);
     void setStartPoint(const QPoint& point);
     void setEndPoint(const QPoint& point);
     void searchPath(bool option);
@@ -76,6 +76,7 @@ public:
 
 private:
     void AStar(bool option);
+    void Dijkstra(bool option);
     bool checkPath(const QPoint& point1, const QPoint& point2);
     float getDistance(const QPoint& point1, const QPoint& point2);
     float getOil(const QPoint& point1, const QPoint& point2);

@@ -5,9 +5,10 @@
 #include <queue>
 #include <unordered_map>
 
-PRM::PRM()
+PRM::PRM(const QString& stragety)
     :start_(-1, -1), goal_(-1, -1)
 {
+    stragety_ = stragety;
     kd_tree_ = nullptr;
     random_gen_ = new QRandomGenerator(QDateTime::currentMSecsSinceEpoch() % UINT_MAX);
 }
@@ -108,6 +109,11 @@ void PRM::generateArc(const QVector<QPoint>& points)
     }
 }
 
+void PRM::setStrategy(const QString &stragety)
+{
+    stragety_ = stragety;
+}
+
 void PRM::setStartPoint(const QPoint &point)
 {
     start_.setX(point.x());
@@ -122,7 +128,18 @@ void PRM::setEndPoint(const QPoint &point)
 
 void PRM::searchPath(bool option)
 {
-    AStar(option);
+    if(stragety_ == "AStar")
+    {
+        AStar(option);
+    }
+    else if(stragety_ == "Dijkstra")
+    {
+        Dijkstra(option);
+    }
+    else
+    {
+        throw std::runtime_error("Invalid stragety");
+    }
 }
 
 const QVector<QPoint> &PRM::getPath() const
@@ -195,6 +212,74 @@ void PRM::AStar(bool option)
             {
                 open_list[next] = new_const;
                 new_const += (this->*getWeight)(vertex[next].pos, vertex[goal].pos); //F = G + H
+                queue.push(AStarCost(next, new_const));
+                parent[next] = current;
+            }
+        }
+    }
+
+    path_.clear();  //empty path
+}
+
+void PRM::Dijkstra(bool option)
+{
+    //function pointer which point to the function of weight calculate
+    float (PRM::*getWeight)(const QPoint& point1, const QPoint& point2);
+
+    if(option)  //oil first
+    {
+        getWeight = &PRM::getOil;
+    }
+    else    //distance first
+    {
+        getWeight = &PRM::getDistance;
+    }
+
+    const QVector<Graph::Vertex> vertex = prm_graph_.getVertex();
+
+    int start = prm_graph_.getVertex(start_);
+    int goal = prm_graph_.getVertex(goal_);
+
+    std::priority_queue<AStarCost, QVector<AStarCost>, std::greater<AStarCost>> queue;  //gobal distance
+    std::unordered_map<int, int> parent;  //the parent node of path node
+    std::unordered_map<int, float> open_list; //current actual distance
+    std::set<int> close_list;
+    QVector<int> neightbor;
+
+    queue.push(AStarCost(start, 0));  //push start point into queue
+    parent[start] = -1;   // -1 stand for no parent node
+    open_list[start] = 0;
+
+    while(!queue.empty())
+    {
+        AStarCost current_const = queue.top();
+        int current = current_const.index;
+        queue.pop();
+
+        close_list.insert(current); //visited
+
+        if(current == goal) //arrive goal
+        {
+            reconstructPath(vertex, start, goal, parent);    // reconstruct path
+            return;
+        }
+
+        neightbor = prm_graph_.getNeightbor(current);
+
+        for(int next: neightbor)
+        {
+            if(close_list.find(next) != close_list.end())   //visited
+            {
+                continue;
+            }
+
+            float new_const = open_list.at(current) +
+                    (this->*getWeight)(vertex[current].pos, vertex[next].pos);   //G
+
+            if(open_list.find(next) == open_list.end()
+                    || new_const < open_list.at(next))
+            {
+                open_list[next] = new_const;
                 queue.push(AStarCost(next, new_const));
                 parent[next] = current;
             }

@@ -29,37 +29,52 @@
         <translation>终点</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="49"/>
-        <source>generate_map</source>
-        <translation>生成地图</translation>
-    </message>
-    <message>
-        <location filename="../src/mainwindow.cpp" line="52"/>
+        <location filename="../src/mainwindow.cpp" line="69"/>
         <source>display_track</source>
         <translation>显示轨迹</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="56"/>
+        <location filename="../src/mainwindow.cpp" line="73"/>
         <source>auto_mode</source>
         <translation>自动寻路</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="59"/>
+        <location filename="../src/mainwindow.cpp" line="49"/>
         <source>distance_priority</source>
         <translation>距离优先</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="62"/>
+        <location filename="../src/mainwindow.cpp" line="52"/>
         <source>energy_priority</source>
         <translation>能量优先</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="73"/>
+        <location filename="../src/mainwindow.cpp" line="55"/>
+        <source>a_star</source>
+        <translation>A Star</translation>
+    </message>
+    <message>
+        <location filename="../src/mainwindow.cpp" line="58"/>
+        <source>dijkstra</source>
+        <translation>Dijkstra</translation>
+    </message>
+    <message>
+        <location filename="../src/mainwindow.cpp" line="78"/>
+        <source>generate_map</source>
+        <translation>生成地图</translation>
+    </message>
+    <message>
+        <location filename="../src/mainwindow.cpp" line="83"/>
+        <source>start_plan</source>
+        <translation>开始规划</translation>
+    </message>
+    <message>
+        <location filename="../src/mainwindow.cpp" line="86"/>
         <source>control_panel</source>
         <translation>控制面板</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="74"/>
+        <location filename="../src/mainwindow.cpp" line="87"/>
         <source>map</source>
         <translation>环境地图</translation>
     </message>

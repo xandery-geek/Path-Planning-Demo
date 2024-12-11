@@ -29,37 +29,52 @@
         <translation>End</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="49"/>
-        <source>generate_map</source>
-        <translation>Generate Map</translation>
-    </message>
-    <message>
-        <location filename="../src/mainwindow.cpp" line="52"/>
+        <location filename="../src/mainwindow.cpp" line="69"/>
         <source>display_track</source>
         <translation>Display Track</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="56"/>
+        <location filename="../src/mainwindow.cpp" line="73"/>
         <source>auto_mode</source>
         <translation>Auto Mode</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="59"/>
+        <location filename="../src/mainwindow.cpp" line="49"/>
         <source>distance_priority</source>
-        <translation>Distance Priority</translation>
+        <translation>Distance</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="62"/>
+        <location filename="../src/mainwindow.cpp" line="52"/>
         <source>energy_priority</source>
-        <translation>Energy Priority</translation>
+        <translation>Energy</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="73"/>
+        <location filename="../src/mainwindow.cpp" line="55"/>
+        <source>a_star</source>
+        <translation>A Star</translation>
+    </message>
+    <message>
+        <location filename="../src/mainwindow.cpp" line="58"/>
+        <source>dijkstra</source>
+        <translation>Dijkstra</translation>
+    </message>
+    <message>
+        <location filename="../src/mainwindow.cpp" line="78"/>
+        <source>generate_map</source>
+        <translation>Generate map</translation>
+    </message>
+    <message>
+        <location filename="../src/mainwindow.cpp" line="83"/>
+        <source>start_plan</source>
+        <translation>Start plan</translation>
+    </message>
+    <message>
+        <location filename="../src/mainwindow.cpp" line="86"/>
         <source>control_panel</source>
         <translation>Control Panel</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="74"/>
+        <location filename="../src/mainwindow.cpp" line="87"/>
         <source>map</source>
         <translation>Environment Map</translation>
     </message>

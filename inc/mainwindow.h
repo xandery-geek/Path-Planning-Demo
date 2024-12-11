@@ -17,6 +17,11 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 private:
+    const int INIT_WIDTH_ = 800;
+    const int INIT_HEIGHT_ = 600;
+    const int LABEL_WIDTH_ = 100;
+    const int EDIT_WIDTH_ = 100;
+    const int CIRCLR_BTN_SIZE_ = 40;
 
     QLabel *width_label_;
     QLabel *height_label_;
@@ -32,9 +37,12 @@ private:
     QCheckBox *display_track_;
     QCheckBox *auto_mode_;
 
-    QButtonGroup *radio_group_;
+    QButtonGroup *radio_group1_;
+    QButtonGroup *radio_group2_;
     QRadioButton *distance_button_; //the distance of path is the first factor
     QRadioButton *energy_button_;  //the amount of the usage of oil is the first factor
+    QRadioButton *astar_button_;   //use A* algorithm to search path
+    QRadioButton *dijkstra_button_;    //use Dijkstra algorithm to search path
 
     QScrollArea *scroll_area_;
     GenerateMap *map_;
@@ -54,6 +62,7 @@ public:
 
 private:
     void setStartButton(bool enable);
+    void setGenerateButton();
 
 public slots:
 

@@ -10,7 +10,8 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     this->setWindowTitle(QObject::tr("title"));
     this->setWindowIcon(QIcon(QString(":/new/prefix1/image/robot_icon.png")));
-    this->resize(800, 600);
+    this->setMinimumSize(INIT_WIDTH_, INIT_HEIGHT_);
+    this->showMaximized();
 
     initWidget();
     connectSigal();
@@ -24,50 +25,63 @@ MainWindow::~MainWindow()
 void MainWindow::initWidget()
 {
     width_label_ = new QLabel(QObject::tr("width"));
-    width_label_->setFixedWidth(50);
+    width_label_->setFixedWidth(LABEL_WIDTH_);
 
     height_label_ = new QLabel(QObject::tr("height"));
-    height_label_->setFixedWidth(50);
+    height_label_->setFixedWidth(LABEL_WIDTH_);
 
     width_edit_ = new QLineEdit("31");
-    width_edit_->setFixedWidth(100);
+    width_edit_->setFixedWidth(EDIT_WIDTH_);
 
     height_edit_ = new QLineEdit("21");
-    height_edit_->setFixedWidth(100);
+    height_edit_->setFixedWidth(EDIT_WIDTH_);
 
     QLabel *start_point = new QLabel(QObject::tr("start"));
-    start_point->setFixedWidth(50);
+    start_point->setFixedWidth(LABEL_WIDTH_);
 
     QLabel *end_point = new QLabel(QObject::tr("end"));
-    end_point->setFixedWidth(50);
+    end_point->setFixedWidth(LABEL_WIDTH_);
 
     start_coordinate_ = new QLabel("");
-    start_coordinate_->setFixedWidth(100);
+    start_coordinate_->setFixedWidth(EDIT_WIDTH_);
     end_coordinate_ = new QLabel("");
-    end_coordinate_->setFixedWidth(100);
+    end_coordinate_->setFixedWidth(EDIT_WIDTH_);
 
-    generate_button_ = new QPushButton(QObject::tr("generate_map"));
-    generate_button_->setFixedWidth(100);
+    distance_button_ = new QRadioButton(QObject::tr("distance_priority"));
+    distance_button_->setFixedWidth(LABEL_WIDTH_);
+    distance_button_->setChecked(true);
+    energy_button_ = new QRadioButton(QObject::tr("energy_priority"));
+    energy_button_->setFixedWidth(LABEL_WIDTH_);
+
+    astar_button_ = new QRadioButton(QObject::tr("a_star"));
+    astar_button_->setFixedWidth(LABEL_WIDTH_);
+    astar_button_->setChecked(true);
+    dijkstra_button_ = new QRadioButton(QObject::tr("dijkstra"));
+    dijkstra_button_->setFixedWidth(LABEL_WIDTH_);
+
+    radio_group1_ = new QButtonGroup;
+    radio_group1_->addButton(distance_button_);
+    radio_group1_->addButton(energy_button_);
+
+    radio_group2_ = new QButtonGroup;
+    radio_group2_->addButton(astar_button_);
+    radio_group2_->addButton(dijkstra_button_);
 
     display_track_ = new QCheckBox(QObject::tr("display_track"));
-    display_track_->setFixedWidth(100);
+    display_track_->setFixedWidth(LABEL_WIDTH_);
     display_track_->setCheckable(false);
 
     auto_mode_ = new QCheckBox(QObject::tr("auto_mode"));
-    auto_mode_->setFixedWidth(100);
+    auto_mode_->setFixedWidth(LABEL_WIDTH_);
 
-    distance_button_ = new QRadioButton(QObject::tr("distance_priority"));
-    distance_button_->setFixedWidth(200);
-    distance_button_->setChecked(true);
-    energy_button_ = new QRadioButton(QObject::tr("energy_priority"));
-    energy_button_->setFixedWidth(200);
-
-    radio_group_ = new QButtonGroup;
-    radio_group_->addButton(distance_button_);
-    radio_group_->addButton(energy_button_);
+    generate_button_ = new QPushButton();
+    generate_button_->setFixedSize(CIRCLR_BTN_SIZE_, CIRCLR_BTN_SIZE_);
+    generate_button_->setToolTip(QObject::tr("generate_map"));
+    setGenerateButton();
 
     start_button_ = new QPushButton();
-    start_button_->setFixedSize(50, 50);
+    start_button_->setFixedSize(CIRCLR_BTN_SIZE_, CIRCLR_BTN_SIZE_);
+    start_button_->setToolTip(QObject::tr("start_plan"));
     setStartButton(false);
 
     control_group_ = new QGroupBox(QObject::tr("control_panel"));
@@ -76,8 +90,8 @@ void MainWindow::initWidget()
     map_ = new GenerateMap();
 
     scroll_area_ = new QScrollArea;
-    //scroll_area_->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-    //scroll_area_->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+    scroll_area_->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+    scroll_area_->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     scroll_area_->setWidgetResizable(true);
     scroll_area_->setWidget(map_);
 
@@ -85,6 +99,10 @@ void MainWindow::initWidget()
     QHBoxLayout *hrizon_layout2 = new QHBoxLayout;
     QHBoxLayout *hrizon_layout3 = new QHBoxLayout;
     QHBoxLayout *hrizon_layout4 = new QHBoxLayout;
+    QHBoxLayout *hrizon_layout5 = new QHBoxLayout;
+    QHBoxLayout *hrizon_layout6 = new QHBoxLayout;
+    QHBoxLayout *hrizon_layout7 = new QHBoxLayout;
+    QHBoxLayout *hrizon_layout8 = new QHBoxLayout;
 
     hrizon_layout1->addWidget(width_label_);
     hrizon_layout1->addWidget(width_edit_);
@@ -98,22 +116,38 @@ void MainWindow::initWidget()
     hrizon_layout4->addWidget(end_point);
     hrizon_layout4->addWidget(end_coordinate_);
 
+    hrizon_layout5->addWidget(distance_button_);
+    hrizon_layout5->addWidget(energy_button_);
+
+    hrizon_layout6->addWidget(astar_button_);
+    hrizon_layout6->addWidget(dijkstra_button_);
+
+    hrizon_layout7->addWidget(display_track_);
+    hrizon_layout7->addWidget(auto_mode_);
+
+    hrizon_layout8->addWidget(generate_button_);
+    hrizon_layout8->addWidget(start_button_);
+
     QVBoxLayout *vertical_layout1 = new QVBoxLayout;
     QVBoxLayout *vertical_layout2 = new QVBoxLayout;
 
     vertical_layout1->addLayout(hrizon_layout1);
     vertical_layout1->addLayout(hrizon_layout2);
+    
     vertical_layout1->addSpacerItem(new QSpacerItem(10, 10, QSizePolicy::Fixed, QSizePolicy::Fixed));
     vertical_layout1->addLayout(hrizon_layout3);
     vertical_layout1->addLayout(hrizon_layout4);
+    
     vertical_layout1->addSpacerItem(new QSpacerItem(10, 10, QSizePolicy::Fixed, QSizePolicy::Fixed));
-    vertical_layout1->addWidget(distance_button_);
-    vertical_layout1->addWidget(energy_button_);
+    vertical_layout1->addLayout(hrizon_layout5);
+    vertical_layout1->addLayout(hrizon_layout6);
+    
     vertical_layout1->addSpacerItem(new QSpacerItem(10, 10, QSizePolicy::Fixed, QSizePolicy::Fixed));
-    vertical_layout1->addWidget(display_track_, Qt::AlignRight);
-    vertical_layout1->addWidget(auto_mode_, Qt::AlignCenter);
-    vertical_layout1->addWidget(generate_button_, Qt::AlignRight);
-    vertical_layout1->addWidget(start_button_, Qt::AlignRight);
+    vertical_layout1->addLayout(hrizon_layout7);
+
+    vertical_layout1->addSpacerItem(new QSpacerItem(10, 10, QSizePolicy::Fixed, QSizePolicy::Fixed));
+    vertical_layout1->addLayout(hrizon_layout8);
+
     vertical_layout1->addSpacerItem(new QSpacerItem(10, 10, QSizePolicy::Fixed, QSizePolicy::Expanding));
 
     vertical_layout2->addWidget(scroll_area_);
@@ -160,6 +194,12 @@ void MainWindow::setStartButton(bool enable)
         start_button_->setDisabled(true);
         start_button_->setStyleSheet("QPushButton{border-image: url(:/new/prefix1/image/button1.png);}");
     }
+}
+
+void MainWindow::setGenerateButton()
+{
+    generate_button_->setStyleSheet("QPushButton{border-image: url(:/new/prefix1/image/generate1.png);}"
+                                    "QPushButton:hover{border-image: url(:/new/prefix1/image/generate2.png);}");
 }
 
 void MainWindow::onStartEndChange(const QPoint &start, const QPoint &end)
@@ -221,13 +261,12 @@ void MainWindow::onStartButton()
     prm.setEndPoint(map_->getEndPoint());      //set end point
     prm.constructGraph(map_->getMapMatrix(), map_->getMapHeight(), map_->getMapWidth());
 
-    if(distance_button_->isChecked())
-    {
-        prm.searchPath(false);   //search path by PRM, distance first
-    }
-    else
-    {
-        prm.searchPath(true);  //search path by PRM, the usage of oil first
+    bool option = distance_button_->isChecked() ? false : true;
+    try {
+        prm.searchPath(option);   //search path by PRM, distance first
+    } catch (std::runtime_error &e) {
+        QMessageBox::about(this, "Error", e.what());
+        return;
     }
 
     QVector<QPoint> points = prm.getPath();
