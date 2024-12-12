@@ -52,7 +52,6 @@ private:
 
     Graph prm_graph_;
     KdTree *kd_tree_;
-    int vertex_k_;  // the scale of nearest beightbor
 
     const int **graph_mat_; //the actual map data
     int graph_mat_row_;
@@ -66,7 +65,7 @@ public:
     ~PRM();
 
     void constructGraph(const int** mat, int row, int col);
-    void generateArc(const QVector<QPoint>& points); //KNN
+    void generateArc(const QVector<QPoint>& points, const int vertex_k);
     void setStrategy(const QString& stragety);
     void setStartPoint(const QPoint& point);
     void setEndPoint(const QPoint& point);

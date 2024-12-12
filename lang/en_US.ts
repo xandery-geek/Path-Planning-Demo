@@ -21,12 +21,12 @@
     <message>
         <location filename="../src/mainwindow.cpp" line="51"/>
         <source>start</source>
-        <translation>Start</translation>
+        <translation>Start Point</translation>
     </message>
     <message>
         <location filename="../src/mainwindow.cpp" line="54"/>
         <source>end</source>
-        <translation>End</translation>
+        <translation>End Point</translation>
     </message>
     <message>
         <location filename="../src/mainwindow.cpp" line="82"/>

@@ -38,13 +38,11 @@ void PRM::constructGraph(const int **mat, int row, int col)
     graph_mat_col_ = col;
 
     int n = VERTEX_COEFFICIENT * row * col;
-    vertex_k_ = K_COEFFICIENT * row * col;
+    int vertex_k = K_COEFFICIENT * row * col; // the scale of nearest beightbor
 
     QVector<QPoint> points;
-
     points.push_back(start_);   //add start point
     points.push_back(goal_);     //add end point
-
 
     int i=0, j=0;
     while(n)
@@ -52,7 +50,7 @@ void PRM::constructGraph(const int **mat, int row, int col)
         i = random_gen_->bounded(row);
         j = random_gen_->bounded(col);
 
-        if(mat[i][j] == 0)
+        if(mat[i][j] == 0 || mat[i][j] == 2)
         {
             points.push_back(QPoint(j, i));
             n--;
@@ -61,17 +59,21 @@ void PRM::constructGraph(const int **mat, int row, int col)
 
     prm_graph_.addVertex(points);   //set vertex table of graph
 
-    this->generateArc(points);      //generate arc of graph
+    this->generateArc(points, vertex_k);      //generate arc of graph
 }
 
-void PRM::generateArc(const QVector<QPoint>& points)
+/**
+@breif PRM::generateArc
+@param points: the nodes of the graph
+@param vertex_k: the scale of nearest beightbor
+@desc generate the arc of the graph by connecting the K nearest neighbors
+ */
+void PRM::generateArc(const QVector<QPoint>& points, const int vertex_k)
 {
     if(prm_graph_.getVertex().size() == 0)
     {
         return;
     }
-
-    //KNN
 
     //construct Kd tree
     if(kd_tree_ != nullptr)
@@ -79,7 +81,7 @@ void PRM::generateArc(const QVector<QPoint>& points)
         delete kd_tree_;
     }
 
-    kd_tree_ = new KdTree(vertex_k_);
+    kd_tree_ = new KdTree(vertex_k);
     kd_tree_->initKdTree(points);
 
     QVector<int> neighbors;

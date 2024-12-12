@@ -24,12 +24,23 @@ private:
         D_DOWN = 3,
     };
 
+    //TODO: replace with enum class
+    enum TerrainType
+    {
+        T_ROAD = 0,
+        T_WALL = 1,
+        T_SAND = 2,
+    };
+
     const int BASE_SIZE_ = 30;  //the size of basic unit of map.
     const int ROBOT_SIZE = 30;  //the size of robot
     const int FLAG_SIZE = 32;   //the size of start and end point
     const int PILE_COEFFICIENT_ = 3;    //pile coefficient of map
     const float EROSING_COEFFICIENT_ = 0.3;  // erosing coefficient of map
     const float SAND_COEFFICIENT_ = 0.05;   // coefficient of sand
+    const int CLUSTER_FIELD_SIZE_ = 3;    //the size of cluster field
+    const int CLUSTER_UPPER_CNT_ = 7;    //the upper limit of cluster
+    const int CLUSTER_LOWER_CNT_ = 3;    //the lower limit of cluster
 
     const QPoint LIMIT_WIDTH_;  //the min and max map width
     const QPoint LIMIT_HEIGHT_; //the min and max map height
@@ -96,8 +107,8 @@ private:
     void generateMaze(int pos_i, int pos_j);    //generate a maze which acted a basic map
     void pileObstacle(int pos_i, int pos_j, int dir, int pile_coeff, int* count);    //pile up small obstacle to generate large obstacle block
     void removeObstacleRandomly(float erosing_coeff);  //remove some obstacle in maze randomly
-    void obstacleClustering();      //clustering, to generate large obstacle block
-    void generateSand();    //genereate sand
+    void obstacleClustering(const int field_size, const int upper_cnt, const int lower_cnt);      //clustering, to generate large obstacle block
+    void generateSand(const float sand_coefficient);    //genereate sand
 
     const QVector<int> existedRoad(const int **mat, int i, int j);   //check if there is a road
     const QVector<int> existedRoad(const int **mat, int i, int j, int dir);

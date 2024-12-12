@@ -109,11 +109,15 @@ void GenerateMap::creatMap(int width, int height)
     }
 
     this->removeObstacleRandomly(EROSING_COEFFICIENT_);
-    this->obstacleClustering(); //waiting for improve
-    this->generateSand();
+    this->obstacleClustering(CLUSTER_FIELD_SIZE_, CLUSTER_UPPER_CNT_, CLUSTER_LOWER_CNT_);
+    this->generateSand(SAND_COEFFICIENT_);
 }
 
-//depth first search to generate maze
+/**
+@brief generate maze by depth first search
+@param pos_i: the start position of row
+@param pos_j: the start position of column
+ */
 void GenerateMap::generateMaze(int pos_i, int pos_j)
 {
     //arrive boarder
@@ -223,7 +227,8 @@ void GenerateMap::removeObstacleRandomly(float erosing_coeff)
 {
     int index_i = 0, index_j = 0;
 
-    for(int count=0; count < erosing_coeff*width_*height_;)
+    int count = 0;
+    while(count < erosing_coeff * width_ * height_)
     {
         index_i = random_gen_->bounded(height_-2) + 1;
         index_j = random_gen_->bounded(width_-2) + 1;
@@ -239,18 +244,20 @@ void GenerateMap::removeObstacleRandomly(float erosing_coeff)
     }
 }
 
-void GenerateMap::obstacleClustering()
+/**
+@brief cluster the obstacle close to each other
+TODO: need to be optimized
+ */
+void GenerateMap::obstacleClustering(const int field_size, const int upper_cnt, const int lower_cnt)
 {
-    int core_size = 3;
-
     int count=0;
 
     for(int i=1; i< height_-1; i++)
     {
         for(int j=1; j <width_-1; j++)
         {
-            count = getMatrixSum(map_matrix_, height_, width_, i, j, core_size);
-            if(count > 7)
+            count = getMatrixSum(map_matrix_, height_, width_, i, j, field_size);
+            if(count > upper_cnt)
             {
                 map_matrix_[i][j] = 1;
             }
@@ -261,8 +268,8 @@ void GenerateMap::obstacleClustering()
     {
         for(int j=1; j <width_-1; j++)
         {
-            count = getMatrixSum(map_matrix_, height_, width_, i, j, core_size);
-            if(count < 3)
+            count = getMatrixSum(map_matrix_, height_, width_, i, j, field_size);
+            if(count < lower_cnt)
             {
                 map_matrix_[i][j] = 0;
                 //setMatrixValue(map_matrix_, height_, width_, i, j, core_size, 0);
@@ -271,9 +278,9 @@ void GenerateMap::obstacleClustering()
     }
 }
 
-void GenerateMap::generateSand()
+void GenerateMap::generateSand(const float sand_coefficient)
 {
-    int n = SAND_COEFFICIENT_*width_*height_;
+    int n = sand_coefficient * width_ * height_;
 
     int index_i=0, index_j =0;
     int count = 0;
