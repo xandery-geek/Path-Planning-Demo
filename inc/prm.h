@@ -4,6 +4,7 @@
 #include <QVector>
 #include <QPoint>
 #include <QRandomGenerator>
+#include <functional>
 #include <unordered_map>
 #include "graph.h"
 #include "kdtree.h"
@@ -40,6 +41,17 @@ public:
 
 class PRM
 {
+public:
+    enum Algorithm {
+        Alg_AStar,
+        Alg_Dijkstra
+    };
+
+    enum Strategy { 
+        Stra_DistanceFirst, 
+        Stra_EnergyFirst 
+    };
+
 private:
     const float VERTEX_COEFFICIENT = 0.4;
     const float K_COEFFICIENT = 0.02;
@@ -56,29 +68,43 @@ private:
     const int **graph_mat_; //the actual map data
     int graph_mat_row_;
     int graph_mat_col_;
-    QString stragety_;
 
     QRandomGenerator *random_gen_;
 
 public:
-    PRM(const QString& stragety="AStar");
+    PRM();
     ~PRM();
 
     void constructGraph(const int** mat, int row, int col);
     void generateArc(const QVector<QPoint>& points, const int vertex_k);
-    void setStrategy(const QString& stragety);
     void setStartPoint(const QPoint& point);
     void setEndPoint(const QPoint& point);
     void setRandomSeed(int seed);
-    void searchPath(bool distance_first);
-    float calPathCost(const QVector<QPoint>& points, bool distance_first);
+    void searchPath(Algorithm algorithm, Strategy strategy);
+    float calPathCost(const QVector<QPoint>& points, Strategy strategy);
 
     const QVector<QPoint>& getPath() const;
     const Graph& getGraph() const;
 
+    std::function<float(const QPoint&, const QPoint&)> selectHeuristic(Strategy strategy) {
+        if (strategy == Stra_DistanceFirst) {
+            return [this](const QPoint& p1, const QPoint& p2) { return calHeuristicDistance(p1, p2); };
+        } else {
+            return [this](const QPoint& p1, const QPoint& p2) { return calHeuristicEnergy(p1, p2); };
+        }
+    }
+
+    std::function<void(Strategy)> selectAlgorithm(Algorithm algorithm) {
+        if (algorithm == Alg_AStar) {
+            return [this](Strategy strategy) { AStar(strategy); };
+        } else {
+            return [this](Strategy strategy) { Dijkstra(strategy); };
+        }
+    }
+
 private:
-    void AStar(bool distance_first);
-    void Dijkstra(bool distance_first);
+    void AStar(Strategy strategy);
+    void Dijkstra(Strategy strategy);
     bool checkPath(const QPoint& point1, const QPoint& point2);
     float calHeuristicDistance(const QPoint& point1, const QPoint& point2);
     float calHeuristicEnergy(const QPoint& point1, const QPoint& point2);
@@ -86,14 +112,6 @@ private:
     bool isCrash(const int** mat, int row, int col, const QPoint& point);
     void reconstructPath(const QVector<Graph::Vertex> &vertex, int start, int goal,
                          const std::unordered_map<int, int> &close_list);
-
-    std::function<float(const QPoint&, const QPoint&)> selectHeuristic(bool distance_first) {
-        if (distance_first) {
-            return [this](const QPoint& p1, const QPoint& p2) { return calHeuristicDistance(p1, p2); };
-        } else {
-            return [this](const QPoint& p1, const QPoint& p2) { return calHeuristicEnergy(p1, p2); };
-        }
-    }
 };
 
 #endif // PRM_H

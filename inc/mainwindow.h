@@ -26,6 +26,7 @@ private:
 
     QLabel *width_label_;
     QLabel *height_label_;
+    QLabel *trial_num_label_;
 
     QLabel *start_coordinate_;
     QLabel *end_coordinate_;
@@ -35,12 +36,15 @@ private:
 
     QLineEdit *width_edit_;
     QLineEdit *height_edit_;
+    QLineEdit *trial_num_edit_;
 
     QLineEdit *map_seed_edit_;
     QLineEdit *prm_seed_edit_;
 
     QPushButton *generate_button_;
     QPushButton *start_button_;
+    QPushButton *report_button_;
+
     QCheckBox *display_track_;
     QCheckBox *auto_mode_;
 
@@ -59,8 +63,10 @@ private:
     QGroupBox *control_group_;
     QGroupBox *map_group_;
 
-    bool is_start_= false;
-    PRM prm;
+    bool is_planning_path_ = false;
+    bool is_generating_report_ = false;
+
+    PRM prm_;
 
 public:
     explicit MainWindow(QWidget *parent = 0);
@@ -72,12 +78,15 @@ public:
 private:
     void setStartButton(bool enable);
     void setGenerateButton();
+    void setReportButton(bool enable);
+    QString generateReport() const;
+    void onReportFinished(const QString& report);
 
 public slots:
-
     void onStartEndChange(const QPoint& start, const QPoint& end);
     void onAutoModeChanged(int state);
     void onGenerateButton();
+    void onReportButton();
     void onStartButton();
     void onDisplayButton();
     void onEditChange();

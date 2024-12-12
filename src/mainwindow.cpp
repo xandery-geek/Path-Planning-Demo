@@ -1,10 +1,14 @@
 #include "mainwindow.h"
 #include "custom_edit.h"
+#include "evaluator.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QSpacerItem>
 #include <QMessageBox>
+#include <QtConcurrent>
+#include <QFuture>
 #include <QRegularExpression>
+
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
@@ -31,11 +35,17 @@ void MainWindow::initWidget()
     height_label_ = new QLabel(QObject::tr("height"));
     height_label_->setFixedWidth(LABEL_WIDTH_);
 
+    trial_num_label_ = new QLabel(QObject::tr("trial_num"));
+    trial_num_label_->setFixedWidth(LABEL_WIDTH_);
+
     width_edit_ = new QLineEdit("31");
     width_edit_->setFixedWidth(EDIT_WIDTH_);
 
     height_edit_ = new QLineEdit("21");
     height_edit_->setFixedWidth(EDIT_WIDTH_);
+
+    trial_num_edit_ = new QLineEdit("10");
+    trial_num_edit_->setFixedWidth(EDIT_WIDTH_);
 
     map_seed_label_ = new QLabel(QObject::tr("map_seed"));
     map_seed_label_->setFixedWidth(LABEL_WIDTH_);
@@ -97,6 +107,11 @@ void MainWindow::initWidget()
     start_button_->setToolTip(QObject::tr("start_plan"));
     setStartButton(false);
 
+    report_button_ = new QPushButton();
+    report_button_->setFixedSize(CIRCLR_BTN_SIZE_, CIRCLR_BTN_SIZE_);
+    report_button_->setToolTip(QObject::tr("generate_report"));
+    setReportButton(true);
+
     log_viewer_ = new CustomPlainTextEdit();
     log_viewer_->setReadOnly(true);
 
@@ -121,12 +136,16 @@ void MainWindow::initWidget()
     QHBoxLayout *hrizon_layout8 = new QHBoxLayout;
     QHBoxLayout *hrizon_layout9 = new QHBoxLayout;
     QHBoxLayout *hrizon_layout10 = new QHBoxLayout;
+    QHBoxLayout *hrizon_layout11 = new QHBoxLayout;
 
     hrizon_layout1->addWidget(width_label_);
     hrizon_layout1->addWidget(width_edit_);
 
     hrizon_layout2->addWidget(height_label_);
     hrizon_layout2->addWidget(height_edit_);
+
+    hrizon_layout11->addWidget(trial_num_label_);
+    hrizon_layout11->addWidget(trial_num_edit_);
 
     hrizon_layout3->addWidget(start_point);
     hrizon_layout3->addWidget(start_coordinate_);
@@ -145,6 +164,7 @@ void MainWindow::initWidget()
 
     hrizon_layout8->addWidget(generate_button_);
     hrizon_layout8->addWidget(start_button_);
+    hrizon_layout8->addWidget(report_button_);
 
     hrizon_layout9->addWidget(map_seed_label_);
     hrizon_layout9->addWidget(map_seed_edit_);
@@ -157,6 +177,7 @@ void MainWindow::initWidget()
 
     vertical_layout1->addLayout(hrizon_layout1);
     vertical_layout1->addLayout(hrizon_layout2);
+    vertical_layout1->addLayout(hrizon_layout11);
 
     vertical_layout1->addSpacerItem(new QSpacerItem(10, 10, QSizePolicy::Fixed, QSizePolicy::Fixed));
     vertical_layout1->addLayout(hrizon_layout9);
@@ -202,12 +223,14 @@ void MainWindow::connectSigal()
 {
     connect(width_edit_, SIGNAL(textChanged(QString)), this, SLOT(onEditChange()));
     connect(height_edit_, SIGNAL(textChanged(QString)), this, SLOT(onEditChange()));
+    connect(trial_num_edit_, SIGNAL(textChanged(QString)), this, SLOT(onEditChange()));
     connect(map_seed_edit_, SIGNAL(textChanged(QString)), this, SLOT(onEditChange()));
     connect(prm_seed_edit_, SIGNAL(textChanged(QString)), this, SLOT(onEditChange()));
     connect(generate_button_, SIGNAL(clicked(bool)), this, SLOT(onGenerateButton()));
     connect(display_track_, SIGNAL(clicked(bool)), this, SLOT(onDisplayButton()));
     connect(auto_mode_, SIGNAL(stateChanged(int)), this, SLOT(onAutoModeChanged(int)));
     connect(start_button_, SIGNAL(clicked(bool)), this, SLOT(onStartButton()));
+    connect(report_button_, SIGNAL(clicked(bool)), this, SLOT(onReportButton()));
     connect(map_, SIGNAL(startEndChanged(QPoint,QPoint)), this, SLOT(onStartEndChange(QPoint,QPoint)));
     connect(map_->animation_group_, SIGNAL(finished()), this, SLOT(onAnimationFinished()));
 }
@@ -216,14 +239,15 @@ void MainWindow::setStartButton(bool enable)
 {
     if(enable)
     {
-        is_start_ = false;
+        is_planning_path_ = false;
         start_button_->setEnabled(true);
-        start_button_->setStyleSheet("QPushButton{border-image: url(:/new/prefix1/image/button3.png);}"
-                                     "QPushButton:hover{border-image: url(:/new/prefix1/image/button4.png);}"
+        start_button_->setStyleSheet("QPushButton{border-image: url(:/new/prefix1/image/button2.png);}"
+                                     "QPushButton:hover{border-image: url(:/new/prefix1/image/button3.png);}"
                                      "QPushButton:pressed{border-image: url(:/new/prefix1/image/button2.png);}");
     }
     else
     {
+        is_planning_path_ = true;
         start_button_->setDisabled(true);
         start_button_->setStyleSheet("QPushButton{border-image: url(:/new/prefix1/image/button1.png);}");
     }
@@ -233,6 +257,28 @@ void MainWindow::setGenerateButton()
 {
     generate_button_->setStyleSheet("QPushButton{border-image: url(:/new/prefix1/image/generate1.png);}"
                                     "QPushButton:hover{border-image: url(:/new/prefix1/image/generate2.png);}");
+}
+
+void MainWindow::setReportButton(bool enable)
+{
+    if(enable)
+    {
+        is_generating_report_ = false;
+        report_button_->setEnabled(true);
+        report_button_->setStyleSheet("QPushButton{border-image: url(:/new/prefix1/image/report2.png);}"
+                                     "QPushButton:hover{border-image: url(:/new/prefix1/image/report3.png);}"
+                                     "QPushButton:pressed{border-image: url(:/new/prefix1/image/report2.png);}");
+    }
+    else
+    {
+        is_generating_report_ = true;
+        report_button_->setDisabled(true);
+        report_button_->setStyleSheet("QPushButton{border-image: url(:/new/prefix1/image/report1.png);}");
+        
+        // Force Qt to process the pending events
+        //TODO: This is a workaround to avoid the GUI freezing when generating the report. Maybe there is a better way to do this.
+        QCoreApplication::processEvents();
+    }
 }
 
 void MainWindow::onStartEndChange(const QPoint &start, const QPoint &end)
@@ -259,6 +305,22 @@ void MainWindow::onAutoModeChanged(int state)
     }
 }
 
+QString MainWindow::generateReport() const
+{
+    Evaluator evaluator(
+        width_edit_->text().toInt(),
+        height_edit_->text().toInt(),
+        trial_num_edit_->text().toInt(),
+        map_seed_edit_->text().toInt(),
+        prm_seed_edit_->text().toInt(),
+        astar_button_->isChecked() ? PRM::Alg_AStar : PRM::Alg_Dijkstra,
+        distance_button_->isChecked() ? PRM::Stra_DistanceFirst : PRM::Stra_EnergyFirst
+    );
+
+    evaluator.evaluate();
+    return evaluator.getResults();
+}
+
 void MainWindow::onGenerateButton()
 {
     //update map
@@ -273,7 +335,7 @@ void MainWindow::onGenerateButton()
     map_->showMap();
 
     //update status flag
-    is_start_ = false;
+    is_planning_path_ = false;
 
     //update button status
     start_coordinate_->setText("");
@@ -285,7 +347,7 @@ void MainWindow::onGenerateButton()
 
 void MainWindow::onStartButton()
 {
-    if(is_start_ == true)
+    if(is_planning_path_ == true)
     {
         return;
     }
@@ -297,30 +359,32 @@ void MainWindow::onStartButton()
         return;
     }
 
-    bool distance_first = distance_button_->isChecked();
-    const QString &algorithm = astar_button_->isChecked() ? "AStar" : "Dijkstra";
+    bool astar_btn_checked = astar_button_->isChecked();
+    bool distance_btn_checked = distance_button_->isChecked();
     
-    log_viewer_->appendPlainText("Searching path..." 
-                                "\nAlgorithm: " + algorithm + 
-                                "\nStrategy: " + (distance_first ? "distance first" : "energy first"));
+    PRM::Algorithm algorithm = astar_btn_checked? PRM::Alg_AStar : PRM::Alg_Dijkstra;
+    PRM::Strategy strategy = distance_btn_checked? PRM::Stra_DistanceFirst : PRM::Stra_EnergyFirst;
+    
+    log_viewer_->appendPlainText(QString("Searching path...") 
+                                + "\nAlgorithm: " + (astar_btn_checked ? "A Star": "Dijkstra") 
+                                + "\nStrategy: " + (distance_btn_checked ? "Distance first" : "Energy first"));
 
     //set random seed
     int prm_seed = prm_seed_edit_->text().toInt();
-    prm.setRandomSeed(prm_seed);
-
-    prm.setStartPoint(map_->getStartPoint());   //set start point
-    prm.setEndPoint(map_->getEndPoint());      //set end point
-    prm.setStrategy(algorithm);                 //set algorithm
-    prm.constructGraph(map_->getMapMatrix(), map_->getMapHeight(), map_->getMapWidth());
+    prm_.setRandomSeed(prm_seed);
+    prm_.setStartPoint(map_->getStartPoint());   //set start point
+    prm_.setEndPoint(map_->getEndPoint());      //set end point
+    prm_.constructGraph(map_->getMapMatrix(), map_->getMapHeight(), map_->getMapWidth());
     
     try {
-        prm.searchPath(distance_first);   //search path by PRM, distance first
+        // search path with selected algorithm and strategy
+        prm_.searchPath(algorithm, strategy);
     } catch (std::runtime_error &e) {
         QMessageBox::about(this, "Error", e.what());
         return;
     }
 
-    QVector<QPoint> points = prm.getPath();
+    QVector<QPoint> points = prm_.getPath();
     if(points.empty())
     {
         log_viewer_->appendPlainText("Path not find");
@@ -328,15 +392,34 @@ void MainWindow::onStartButton()
     }
     else
     {
-        float cost = prm.calPathCost(points, distance_first);
+        float cost = prm_.calPathCost(points, strategy);
         log_viewer_->appendPlainText("Path cost: " + QString::number(cost));
 
         map_->showRobot(points);    //show animation
         setStartButton(false);      //disable start button
-
-        is_start_ = true;
         display_track_->setCheckable(true);
     }
+}
+
+void MainWindow::onReportButton()
+{
+    if(is_generating_report_ == true)
+    {
+        return;
+    }
+    setReportButton(false);
+    log_viewer_->appendPlainText("Generating report...");
+    
+    QFuture<QString> future = QtConcurrent::run([this]() { return generateReport(); });
+        future.then([this](const QString &result) {
+            onReportFinished(result); // Handle the result directly
+    });
+}
+
+void MainWindow::onReportFinished(const QString &report)
+{
+    setReportButton(true);
+    log_viewer_->appendPlainText(report);
 }
 
 void MainWindow::onDisplayButton()
@@ -346,8 +429,8 @@ void MainWindow::onDisplayButton()
         Graph graph;
         QVector<QPoint> points;
 
-        graph = prm.getGraph();
-        points = prm.getPath();
+        graph = prm_.getGraph();
+        points = prm_.getPath();
 
         if(points.empty())
         {

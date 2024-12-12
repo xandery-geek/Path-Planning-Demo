@@ -6,7 +6,6 @@
         <file>image/button3.png</file>
         <file>image/wall.png</file>
         <file>image/road.png</file>
-        <file>image/button4.png</file>
         <file>image/start.png</file>
         <file>image/end.png</file>
         <file>image/generate1.png</file>
@@ -15,5 +14,8 @@
         <file>image/wall1.png</file>
         <file>image/sand.jpg</file>
         <file>image/robot.png</file>
+        <file>image/report1.png</file>
+        <file>image/report2.png</file>
+        <file>image/report3.png</file>
     </qresource>
 </RCC>

@@ -5,10 +5,9 @@
 #include <queue>
 #include <unordered_map>
 
-PRM::PRM(const QString& stragety)
+PRM::PRM()
     :start_(-1, -1), goal_(-1, -1)
 {
-    stragety_ = stragety;
     kd_tree_ = nullptr;
     random_gen_ = new QRandomGenerator(QDateTime::currentMSecsSinceEpoch() % UINT_MAX);
 }
@@ -111,11 +110,6 @@ void PRM::generateArc(const QVector<QPoint>& points, const int vertex_k)
     }
 }
 
-void PRM::setStrategy(const QString &stragety)
-{
-    stragety_ = stragety;
-}
-
 void PRM::setStartPoint(const QPoint &point)
 {
     start_.setX(point.x());
@@ -140,15 +134,15 @@ void PRM::setRandomSeed(int seed)
     }
 }
 
-void PRM::searchPath(bool distance_first)
+void PRM::searchPath(Algorithm algorithm, Strategy strategy)
 {
-    if(stragety_ == "AStar")
+    if(algorithm == Alg_AStar)
     {
-        AStar(distance_first);
+        AStar(strategy);
     }
-    else if(stragety_ == "Dijkstra")
+    else if(algorithm == Alg_Dijkstra)
     {
-        Dijkstra(distance_first);
+        Dijkstra(strategy);
     }
     else
     {
@@ -156,7 +150,7 @@ void PRM::searchPath(bool distance_first)
     }
 }
 
-float PRM::calPathCost(const QVector<QPoint> &points, bool distance_first)
+float PRM::calPathCost(const QVector<QPoint> &points, Strategy strategy)
 {
     float cost = 0.0f;
 
@@ -165,7 +159,7 @@ float PRM::calPathCost(const QVector<QPoint> &points, bool distance_first)
         return cost;
     }
 
-    auto heuristic_function = selectHeuristic(distance_first);
+    auto heuristic_function = selectHeuristic(strategy);
 
     for(int i=0; i<points.size()-1; i++)
     {
@@ -190,9 +184,9 @@ const Graph &PRM::getGraph() const
 @param distance_first: true for distance first, false for energy first
 @desc Dijkstra algorithm
 */
-void PRM::Dijkstra(bool distance_first)
+void PRM::Dijkstra(Strategy strategy)
 {
-    auto heuristic_function = selectHeuristic(distance_first);
+    auto heuristic_function = selectHeuristic(strategy);
 
     const QVector<Graph::Vertex> vertex = prm_graph_.getVertex();
 
@@ -253,9 +247,9 @@ void PRM::Dijkstra(bool distance_first)
 @param distance_first: true for distance first, false for energy first
 @desc A star algorithm, the difference between A star and Dijkstra is that A star has a heuristic weight
 */
-void PRM::AStar(bool distance_first)
+void PRM::AStar(Strategy strategy)
 {
-    auto heuristic_function = selectHeuristic(distance_first);
+    auto heuristic_function = selectHeuristic(strategy);
 
     const QVector<Graph::Vertex> vertex = prm_graph_.getVertex();
 
