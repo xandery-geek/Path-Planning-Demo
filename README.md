@@ -1,14 +1,14 @@
 # Path Planning Demo
-<center>
-<img src="figures/overview.png" alt="The overview of Path Planning Demo" width="80%">
-</center>
+<div align="center">
+<img src="figures/overview.png" alt="The overview of Path Planning Demo" width="600">
+</div>
 
 A rotbot path planning demo supporting for the following features:
 
 - [x] randomly generate environment maps with three types of terrain: road, wall and sandy
 - [x] allow users to set start and goal points in any valid position
 - [x] contruct graphs for motion planning by (Probabilistic Roadmap Method) PRM algorithm
-- [x] path palnning with Dijastra's algorithm or $A^*$ algorithm
+- [x] path palnning with Dijkstra's algorithm or $A^*$ algorithm
 - [x] show an animation of the robot pathfinding around the environment map
 
 > The simulation program is developed in C++ and provides a Qt-based GUI. It supports for multiple languages, including English and Chinese. 
@@ -43,22 +43,24 @@ As shown in the following figure, this project designs the following map generat
 
 Users can set start and end points for the robot in any valid position (as blue flags in the figure).
 
-<center>
-<div style="display: flex; justify-content: center; gap: 10px;">
-    <div width="30%">
-        <img src="figures/map1.png" alt="">
-        <div>(a)</div>
-    </div>
-    <div width="30%">
-        <img src="figures/map2.png" alt="">
-        <div>(b)</div>
-    </div>
-    <div width="30%">
-        <img src="figures/map3.png" alt="">
-        <div>(c)</div>
-    </div>
+<div align="center">
+    <table>
+        <tr>
+            <td align="center">
+                <img src="figures/map1.png" alt="" width="200"><br>
+                (a)
+            </td>
+            <td align="center">
+                <img src="figures/map2.png" alt="" width="200"><br>
+                (b)
+            </td>
+            <td align="center">
+                <img src="figures/map3.png" alt="" width="200"><br>
+                (c)
+            </td>
+        </tr>
+    </table>
 </div>
-</center>
 
 ## PRM Algorithm
 Notably, instead of regarding all non-obstacle blocks as nodes of graph, this project uses the **Probabilistic Roadmap Method (PRM)**, which constructs a graph by sampling random points in the environment, making it well-suited for motion planning in large spaces. Each sampled node is connected with its top-K nearest neighbors.
@@ -75,15 +77,15 @@ Additionally, this projects designs two cost strategies: distance-first and ener
 - The latter requires the robot to plan a path that consumes as little energy as possible, i.e., goes through fewer sandy cells.
 
 The following figures show two cases for distance-first and energy-first, respectively. It can be seen that **the robot chooses a path with fewer sandy blocks when the energy first criterion is enabled**
-<center>
-<img src="./figures/astar-distance.png" alt="" width="80%">
+<div align="center">
+<img src="./figures/astar-distance.png" alt="" width="600">
 <div>(a) A case for A star algorithm under the distance-first setting</div>
-</center>
+</div>
 
-<center>
-<img src="./figures/astar-energy.png" alt="" width="80%">
+<div align="center">
+<img src="./figures/astar-energy.png" alt="" width="600">
 <div>(b) A case for A star algorithm under the energy-first setting</div>
-</center>
+</div>
 
 
 ## LICENSE
